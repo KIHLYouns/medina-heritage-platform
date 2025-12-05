@@ -247,35 +247,4 @@ class PointTransactionServiceTest {
                     .hasMessageContaining("Transaction not found");
         }
     }
-
-    @Nested
-    @DisplayName("Get Total Points Tests")
-    class GetTotalPointsTests {
-
-        @Test
-        @DisplayName("Should return total points earned")
-        void shouldReturnTotalPointsEarned() {
-            // Given
-            when(transactionRepository.sumPointsEarnedByUserId(testUserId)).thenReturn(500);
-
-            // When
-            Integer totalEarned = transactionService.getTotalPointsEarned(testUserId);
-
-            // Then
-            assertThat(totalEarned).isEqualTo(500);
-        }
-
-        @Test
-        @DisplayName("Should return total points spent")
-        void shouldReturnTotalPointsSpent() {
-            // Given
-            when(transactionRepository.sumPointsSpentByUserId(testUserId)).thenReturn(200);
-
-            // When
-            Integer totalSpent = transactionService.getTotalPointsSpent(testUserId);
-
-            // Then
-            assertThat(totalSpent).isEqualTo(200);
-        }
-    }
 }

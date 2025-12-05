@@ -96,24 +96,4 @@ public class PointTransactionController {
         PointTransactionResponse response = transactionService.getTransactionById(id);
         return ResponseEntity.ok(ApiResponse.success("Transaction retrieved", response));
     }
-
-    /**
-     * Récupère le total des points gagnés par un utilisateur.
-     * GET /api/transactions/user/{userId}/total-earned
-     */
-    @GetMapping("/user/{userId}/total-earned")
-    public ResponseEntity<ApiResponse<Integer>> getTotalPointsEarned(@PathVariable UUID userId) {
-        Integer total = transactionService.getTotalPointsEarned(userId);
-        return ResponseEntity.ok(ApiResponse.success("Total points earned retrieved", total));
-    }
-
-    /**
-     * Récupère le total des points dépensés par un utilisateur.
-     * GET /api/transactions/user/{userId}/total-spent
-     */
-    @GetMapping("/user/{userId}/total-spent")
-    public ResponseEntity<ApiResponse<Integer>> getTotalPointsSpent(@PathVariable UUID userId) {
-        Integer total = transactionService.getTotalPointsSpent(userId);
-        return ResponseEntity.ok(ApiResponse.success("Total points spent retrieved", total));
-    }
 }

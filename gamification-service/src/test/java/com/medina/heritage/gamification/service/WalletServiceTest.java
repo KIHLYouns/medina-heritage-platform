@@ -320,63 +320,6 @@ class WalletServiceTest {
     }
 
     @Nested
-    @DisplayName("Balance and Level Tests")
-    class BalanceAndLevelTests {
-
-        @Test
-        @DisplayName("Should return balance for existing user")
-        void shouldReturnBalanceForExistingUser() {
-            // Given
-            when(walletRepository.findByUserId(testUserId)).thenReturn(Optional.of(testWallet));
-
-            // When
-            Integer balance = walletService.getBalance(testUserId);
-
-            // Then
-            assertThat(balance).isEqualTo(100);
-        }
-
-        @Test
-        @DisplayName("Should return zero balance for non-existing user")
-        void shouldReturnZeroBalanceForNonExistingUser() {
-            // Given
-            when(walletRepository.findByUserId(testUserId)).thenReturn(Optional.empty());
-
-            // When
-            Integer balance = walletService.getBalance(testUserId);
-
-            // Then
-            assertThat(balance).isEqualTo(0);
-        }
-
-        @Test
-        @DisplayName("Should return level for existing user")
-        void shouldReturnLevelForExistingUser() {
-            // Given
-            when(walletRepository.findByUserId(testUserId)).thenReturn(Optional.of(testWallet));
-
-            // When
-            Integer level = walletService.getLevel(testUserId);
-
-            // Then
-            assertThat(level).isEqualTo(1);
-        }
-
-        @Test
-        @DisplayName("Should return level 1 for non-existing user")
-        void shouldReturnLevel1ForNonExistingUser() {
-            // Given
-            when(walletRepository.findByUserId(testUserId)).thenReturn(Optional.empty());
-
-            // When
-            Integer level = walletService.getLevel(testUserId);
-
-            // Then
-            assertThat(level).isEqualTo(1);
-        }
-    }
-
-    @Nested
     @DisplayName("User Rank Tests")
     class UserRankTests {
 

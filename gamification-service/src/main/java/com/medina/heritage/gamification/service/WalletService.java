@@ -141,24 +141,6 @@ public class WalletService {
     }
 
     /**
-     * Récupère le solde d'un utilisateur.
-     */
-    public Integer getBalance(UUID userId) {
-        return walletRepository.findByUserId(userId)
-                .map(Wallet::getBalance)
-                .orElse(0);
-    }
-
-    /**
-     * Récupère le niveau d'un utilisateur.
-     */
-    public Integer getLevel(UUID userId) {
-        return walletRepository.findByUserId(userId)
-                .map(Wallet::getLevel)
-                .orElse(1);
-    }
-
-    /**
      * Récupère le rang d'un utilisateur.
      */
     public Long getUserRank(UUID userId) {

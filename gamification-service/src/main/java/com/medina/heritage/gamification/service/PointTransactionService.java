@@ -76,18 +76,4 @@ public class PointTransactionService {
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found: " + id));
         return transactionMapper.toPointTransactionResponse(transaction);
     }
-
-    /**
-     * Calcule le total des points gagnés par un utilisateur.
-     */
-    public Integer getTotalPointsEarned(UUID userId) {
-        return transactionRepository.sumPointsEarnedByUserId(userId);
-    }
-
-    /**
-     * Calcule le total des points dépensés par un utilisateur.
-     */
-    public Integer getTotalPointsSpent(UUID userId) {
-        return transactionRepository.sumPointsSpentByUserId(userId);
-    }
 }

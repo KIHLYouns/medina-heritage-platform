@@ -1,9 +1,7 @@
 package com.medina.heritage.gamification.mapper;
 
-import com.medina.heritage.gamification.dto.response.PageResponse;
 import com.medina.heritage.gamification.dto.response.PointTransactionResponse;
 import com.medina.heritage.gamification.entity.PointTransaction;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -45,24 +43,5 @@ public class PointTransactionMapper {
         return transactions.stream()
                 .map(this::toPointTransactionResponse)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Convertit une page de PointTransaction en PageResponse.
-     */
-    public PageResponse<PointTransactionResponse> toPageResponse(Page<PointTransaction> page) {
-        List<PointTransactionResponse> content = page.getContent().stream()
-                .map(this::toPointTransactionResponse)
-                .collect(Collectors.toList());
-
-        return new PageResponse<>(
-                content,
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.hasNext(),
-                page.hasPrevious()
-        );
     }
 }

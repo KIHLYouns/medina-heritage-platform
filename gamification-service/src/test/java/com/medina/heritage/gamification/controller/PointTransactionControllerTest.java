@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -21,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -163,42 +161,6 @@ class PointTransactionControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.success").value(true))
                     .andExpect(jsonPath("$.data.id").value(testTransactionId.toString()));
-        }
-    }
-
-    @Nested
-    @DisplayName("GET /api/transactions/user/{userId}/total-earned")
-    class GetTotalPointsEarnedTests {
-
-        @Test
-        @DisplayName("Should return total points earned")
-        void shouldReturnTotalPointsEarned() throws Exception {
-            // Given
-            when(transactionService.getTotalPointsEarned(testUserId)).thenReturn(500);
-
-            // When/Then
-            mockMvc.perform(get("/api/transactions/user/{userId}/total-earned", testUserId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data").value(500));
-        }
-    }
-
-    @Nested
-    @DisplayName("GET /api/transactions/user/{userId}/total-spent")
-    class GetTotalPointsSpentTests {
-
-        @Test
-        @DisplayName("Should return total points spent")
-        void shouldReturnTotalPointsSpent() throws Exception {
-            // Given
-            when(transactionService.getTotalPointsSpent(testUserId)).thenReturn(200);
-
-            // When/Then
-            mockMvc.perform(get("/api/transactions/user/{userId}/total-spent", testUserId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data").value(200));
         }
     }
 }

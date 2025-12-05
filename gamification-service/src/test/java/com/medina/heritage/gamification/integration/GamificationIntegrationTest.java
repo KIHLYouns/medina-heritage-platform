@@ -91,34 +91,6 @@ class GamificationIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.balance").value(500));
         }
-
-        @Test
-        @DisplayName("Should return balance for user")
-        void shouldReturnBalanceForUser() throws Exception {
-            // Given
-            createAndSaveWallet(testUserId, 250);
-
-            // When/Then
-            mockMvc.perform(get("/api/wallets/{userId}/balance", testUserId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").value(250));
-        }
-
-        @Test
-        @DisplayName("Should return level for user")
-        void shouldReturnLevelForUser() throws Exception {
-            // Given
-            Wallet wallet = new Wallet(testUserId);
-            wallet.setBalance(1500);
-            wallet.setTotalEarned(1500);
-            wallet.setLevel(2); // Level 2 for 1500 points
-            walletRepository.save(wallet);
-
-            // When/Then
-            mockMvc.perform(get("/api/wallets/{userId}/level", testUserId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").value(2));
-        }
     }
 
     @Nested
@@ -350,32 +322,6 @@ class GamificationIntegrationTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data").isArray())
                     .andExpect(jsonPath("$.data[0].points").value(100));
-        }
-
-        @Test
-        @DisplayName("Should return total points earned")
-        void shouldReturnTotalPointsEarned() throws Exception {
-            // Given
-            AddPointsRequest request = new AddPointsRequest();
-            request.setUserId(testUserId);
-            request.setPoints(100);
-            request.setReasonCode("REPORT_VALIDATED");
-
-            mockMvc.perform(post("/api/wallets/add-points")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated());
-
-            request.setPoints(50);
-            mockMvc.perform(post("/api/wallets/add-points")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated());
-
-            // When/Then
-            mockMvc.perform(get("/api/transactions/user/{userId}/total-earned", testUserId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data").value(150));
         }
     }
 

@@ -37,26 +37,6 @@ public class WalletController {
     }
 
     /**
-     * Récupère le solde d'un utilisateur.
-     * GET /api/wallets/{userId}/balance
-     */
-    @GetMapping("/{userId}/balance")
-    public ResponseEntity<ApiResponse<Integer>> getBalance(@PathVariable UUID userId) {
-        Integer balance = walletService.getBalance(userId);
-        return ResponseEntity.ok(ApiResponse.success("Balance retrieved", balance));
-    }
-
-    /**
-     * Récupère le niveau d'un utilisateur.
-     * GET /api/wallets/{userId}/level
-     */
-    @GetMapping("/{userId}/level")
-    public ResponseEntity<ApiResponse<Integer>> getLevel(@PathVariable UUID userId) {
-        Integer level = walletService.getLevel(userId);
-        return ResponseEntity.ok(ApiResponse.success("Level retrieved", level));
-    }
-
-    /**
      * Récupère le rang d'un utilisateur.
      * GET /api/wallets/{userId}/rank
      */

@@ -98,42 +98,6 @@ class WalletControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /api/wallets/{userId}/balance")
-    class GetBalanceTests {
-
-        @Test
-        @DisplayName("Should return balance for user")
-        void shouldReturnBalanceForUser() throws Exception {
-            // Given
-            when(walletService.getBalance(testUserId)).thenReturn(100);
-
-            // When/Then
-            mockMvc.perform(get("/api/wallets/{userId}/balance", testUserId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data").value(100));
-        }
-    }
-
-    @Nested
-    @DisplayName("GET /api/wallets/{userId}/level")
-    class GetLevelTests {
-
-        @Test
-        @DisplayName("Should return level for user")
-        void shouldReturnLevelForUser() throws Exception {
-            // Given
-            when(walletService.getLevel(testUserId)).thenReturn(2);
-
-            // When/Then
-            mockMvc.perform(get("/api/wallets/{userId}/level", testUserId))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.success").value(true))
-                    .andExpect(jsonPath("$.data").value(2));
-        }
-    }
-
-    @Nested
     @DisplayName("GET /api/wallets/{userId}/rank")
     class GetRankTests {
 
