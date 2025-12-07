@@ -1,5 +1,6 @@
 package com.medina.heritage.userauth.service;
 
+import com.medina.heritage.events.user.UserCreatedEvent;
 import com.medina.heritage.userauth.dto.request.ChangePasswordRequest;
 import com.medina.heritage.userauth.dto.request.LoginRequest;
 import com.medina.heritage.userauth.dto.request.RegisterRequest;
@@ -7,15 +8,14 @@ import com.medina.heritage.userauth.dto.response.AuthResponse;
 import com.medina.heritage.userauth.entity.Role;
 import com.medina.heritage.userauth.entity.User;
 import com.medina.heritage.userauth.enums.RoleName;
-import com.medina.heritage.userauth.event.UserCreatedEvent;
 import com.medina.heritage.userauth.exception.BadRequestException;
 import com.medina.heritage.userauth.exception.ResourceNotFoundException;
-import com.medina.heritage.userauth.integration.GamificationServiceClient;
-import com.medina.heritage.userauth.integration.SalesforceServiceClient;
 import com.medina.heritage.userauth.mapper.UserMapper;
+import com.medina.heritage.userauth.messaging.UserEventPublisher;
 import com.medina.heritage.userauth.repository.RoleRepository;
 import com.medina.heritage.userauth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +25,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final SalesforceServiceClient salesforceServiceClient;
-    private final GamificationServiceClient gamificationServiceClient;
     private final UserMapper userMapper;
     private final PasswordService passwordService;
+    private final UserEventPublisher userEventPublisher;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -53,8 +53,8 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // Notify external services (async - non-blocking)
-        notifyExternalServices(savedUser);
+        // Publish UserCreatedEvent
+        publishUserCreatedEvent(savedUser);
 
         AuthResponse response = new AuthResponse();
         response.setUser(userMapper.toUserResponse(savedUser));
@@ -63,30 +63,30 @@ public class AuthService {
     }
 
     /**
-     * Notifie les services externes de la création d'un utilisateur.
+     * Publish UserCreatedEvent to the message broker.
+     * This replaces direct HTTP calls to gamification and salesforce services.
      */
-    private void notifyExternalServices(User user) {
+    private void publishUserCreatedEvent(User user) {
         Set<String> roleNames = user.getRoles().stream()
                 .map(Role::getName)
                 .collect(Collectors.toSet());
 
-        // Notifier Salesforce
-        UserCreatedEvent event = UserCreatedEvent.fromUser(
-                user.getId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getPhoneNumber(),
-                roleNames,
-                user.getCreatedAt()
-        );
-        salesforceServiceClient.notifyUserCreated(event);
+        UserCreatedEvent event = UserCreatedEvent.builder()
+                .userId(user.getId().getMostSignificantBits()) // Convert UUID to Long
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phoneNumber(user.getPhoneNumber())
+                .roles(roleNames)
+                .build();
 
-        // Créer un wallet dans le service de gamification
-        gamificationServiceClient.createUserWallet(user.getId(), user.getEmail());
-        
-        // Ajouter des points de bienvenue
-        gamificationServiceClient.addWelcomePoints(user.getId(), 100);
+        try {
+            userEventPublisher.publishUserCreated(event);
+            log.info("Published UserCreatedEvent for user: {}", user.getEmail());
+        } catch (Exception e) {
+            // Log error but don't fail the registration
+            log.error("Failed to publish UserCreatedEvent for user: {}. Error: {}", user.getEmail(), e.getMessage());
+        }
     }
 
     public AuthResponse login(LoginRequest request) {

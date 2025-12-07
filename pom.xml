@@ -15,6 +15,7 @@
 	<name>heritage</name>
 	<description>Demo project for Spring Boot</description>
 	<modules>
+		<module>events-common</module>
 		<module>user-auth-service</module>
 		<module>patrimoine-service</module>
 		<module>iot-service</module>
