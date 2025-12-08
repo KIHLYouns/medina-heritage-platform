@@ -13,7 +13,7 @@ import java.util.UUID;
  * Provides common fields for event tracking and correlation.
  */
 @Data
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class BaseEvent {

@@ -16,11 +16,11 @@
      
     <dependencies>
         <!-- Lombok for reducing boilerplate -->
-        <dependency>
+            <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
+            <version>1.18.30</version> <scope>provided</scope>
+            </dependency>
         
         <!-- Jackson for JSON serialization -->
         <dependency>
@@ -31,6 +31,7 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+        
     </dependencies>
 </project> 
  
