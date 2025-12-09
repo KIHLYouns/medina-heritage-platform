@@ -12,6 +12,23 @@
 	<description>Patrimoine (Heritage) Service</description>
 
     <dependencies>
+    <!-- Events Common (Module interne) -->
+    <dependency>
+        <groupId>com.medina</groupId>
+        <artifactId>events-common</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
+    <!-- Spring Cloud Stream + RabbitMQ Binder -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-stream</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+    </dependency>
+
     <!-- Web REST -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -71,6 +88,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+        <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+    </dependency>
+        <dependency>
+            <groupId>com.medina</groupId>
+            <artifactId>events-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+    </dependency>
 </dependencies>
 
     <build>

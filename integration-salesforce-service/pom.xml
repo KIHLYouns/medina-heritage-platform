@@ -12,6 +12,23 @@
 	<description>Integration Salesforce Service</description>
 
 	<dependencies>
+		<!-- Events Common (Module interne) -->
+		<dependency>
+			<groupId>com.medina</groupId>
+			<artifactId>events-common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Spring Cloud Stream + RabbitMQ Binder -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-stream</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -30,10 +47,5 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- Spring Cloud Stream for RabbitMQ/Kafka if needed later -->
-        <dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-stream</artifactId>
-		</dependency>
 	</dependencies>
 </project>

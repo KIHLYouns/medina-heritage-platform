@@ -17,7 +17,7 @@ public interface QrTagMapper {
   // Request DTO -> Entity
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "installedAt", ignore = true)
-  @Mapping(target = "status", constant = "ACTIVE") // Par défaut
-  @Mapping(target = "building", ignore = true) // On le settera manuellement dans le Service
+  @Mapping(target = "status", constant = "ACTIVE")
+  @Mapping(target = "building", ignore = true) 
   QrTag toEntity(CreateQrTagRequestDTO dto);
 }

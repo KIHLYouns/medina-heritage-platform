@@ -15,6 +15,9 @@ CREATE TABLE IF NOT EXISTS buildings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE buildings 
+ADD COLUMN image_url TEXT;
+
 -- 3. Créer les index pour la performance (Géographie et Salesforce)
 CREATE INDEX IF NOT EXISTS idx_buildings_geom ON buildings USING GIST (geom);
 CREATE INDEX IF NOT EXISTS idx_buildings_sf_id ON buildings(sf_asset_id);
