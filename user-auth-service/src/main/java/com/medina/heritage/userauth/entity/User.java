@@ -22,10 +22,13 @@ public class User {
     @Id
     private UUID id;
 
+    @Column(name = "clerk_id", unique = true)
+    private String clerkId;
+
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash", nullable = true)
     private String passwordHash;
 
     @Column(name = "first_name", length = 100)
@@ -52,11 +55,7 @@ public class User {
     private OffsetDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
     @PrePersist

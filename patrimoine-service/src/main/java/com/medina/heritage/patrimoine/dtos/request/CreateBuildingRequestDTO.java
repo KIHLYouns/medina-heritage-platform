@@ -19,4 +19,6 @@ public class CreateBuildingRequestDTO {
 
   @NotNull(message = "La longitude est requise")
   private Double longitude;
+
+  private String imageUrl;
 }

@@ -11,4 +11,5 @@ public class BuildingResponseDTO {
   private String address;
   private String sfAssetId;
   private LocationDTO location; 
+  private String imageUrl;
 }

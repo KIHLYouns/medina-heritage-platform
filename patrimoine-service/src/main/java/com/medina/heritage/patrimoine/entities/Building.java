@@ -37,6 +37,9 @@ public class Building {
   @Column(name = "sf_asset_id")
   private String sfAssetId;
 
+  @Column(name = "image_url", columnDefinition = "TEXT")
+  private String imageUrl;
+
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)
   private LocalDateTime createdAt;
@@ -44,4 +47,6 @@ public class Building {
   @UpdateTimestamp
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+
 }

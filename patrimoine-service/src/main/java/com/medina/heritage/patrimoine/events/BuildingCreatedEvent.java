@@ -18,10 +18,11 @@ import java.util.UUID;
 public class BuildingCreatedEvent {
 
   private UUID id;
-  private String code; 
-  private String name; 
+  private String code;
+  private String name;
   private String address;
-  private Double latitude; 
+  private Double latitude;
   private Double longitude;
+  private String imageUrl;
   private LocalDateTime createdAt;
 }

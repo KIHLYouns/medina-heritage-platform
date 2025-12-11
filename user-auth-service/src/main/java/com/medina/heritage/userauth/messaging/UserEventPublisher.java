@@ -1,6 +1,7 @@
 package com.medina.heritage.userauth.messaging;
 
 import com.medina.heritage.events.user.UserCreatedEvent;
+import com.medina.heritage.events.user.UserCreatedByClerkEvent;
 import com.medina.heritage.events.user.UserDeletedEvent;
 import com.medina.heritage.events.user.UserUpdatedEvent;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class UserEventPublisher {
     private static final String USER_CREATED_BINDING = "userCreatedSupplier-out-0";
     private static final String USER_UPDATED_BINDING = "userUpdatedSupplier-out-0";
     private static final String USER_DELETED_BINDING = "userDeletedSupplier-out-0";
+    private static final String USER_CREATED_BY_CLERK_BINDING = "userCreatedByClerkSupplier-out-0";
 
     /**
      * Publishes a UserCreatedEvent when a new user is registered.
@@ -62,6 +64,21 @@ public class UserEventPublisher {
             log.debug("UserDeletedEvent sent successfully for user: {}", event.getUserId());
         } else {
             log.error("Failed to send UserDeletedEvent for user: {}", event.getUserId());
+        }
+    }
+
+    /**
+     * Publishes a UserCreatedByClerkEvent when Clerk sends a webhook.
+     * Cet événement sera consommé par le consumer dans ce même service.
+     */
+    public void publishUserCreatedByClerk(UserCreatedByClerkEvent event) {
+        event.initializeDefaults();
+        log.info("Publishing UserCreatedByClerkEvent for Clerk user: {}", event.getClerkUserId());
+        boolean sent = streamBridge.send(USER_CREATED_BY_CLERK_BINDING, event);
+        if (sent) {
+            log.debug("UserCreatedByClerkEvent sent successfully for user: {}", event.getClerkUserId());
+        } else {
+            log.error("Failed to send UserCreatedByClerkEvent for user: {}", event.getClerkUserId());
         }
     }
 }

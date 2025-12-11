@@ -72,7 +72,7 @@ public class AuthService {
                 .collect(Collectors.toSet());
 
         UserCreatedEvent event = UserCreatedEvent.builder()
-                .userId(user.getId().getMostSignificantBits()) // Convert UUID to Long
+                .userId(user.getId().toString()) // ✅ CORRECTION ICI : On utilise toString() (String) au lieu de Long
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -126,20 +126,10 @@ public class AuthService {
     /**
      * Gère la déconnexion de l'utilisateur.
      * Sans JWT, le logout est principalement géré côté client.
-     * Ce endpoint peut être utilisé pour :
-     * - Logger l'événement de déconnexion
-     * - Invalider des sessions si implémenté plus tard
-     * - Déclencher des événements (analytics, etc.)
      */
     public void logout(UUID userId) {
         if (userId != null) {
-            // Vérifier que l'utilisateur existe (optionnel)
             userRepository.findById(userId).ifPresent(user -> {
-                // Ici on pourrait ajouter des actions comme:
-                // - Enregistrer l'heure de dernière déconnexion
-                // - Logger l'événement
-                // - Publier un événement pour analytics
-                // Pour l'instant, on log simplement
                 System.out.println("User logged out: " + user.getEmail());
             });
         }

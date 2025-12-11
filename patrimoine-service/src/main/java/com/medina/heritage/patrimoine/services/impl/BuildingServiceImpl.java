@@ -52,6 +52,7 @@ public class BuildingServiceImpl implements BuildingService {
           .latitude(saved.getGeom() != null ? saved.getGeom().getY() : null)
           .longitude(saved.getGeom() != null ? saved.getGeom().getX() : null)
           .createdAt(LocalDateTime.now())
+          .imageUrl(saved.getImageUrl())
           .build();
 
       eventPublisher.publishBuildingCreated(event);
