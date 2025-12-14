@@ -1,101 +1,102 @@
 package com.medina.heritage.integration.service;
 
-import com.medina.heritage.integration.config.SalesforceOAuth2Response;
-import com.medina.heritage.integration.config.SalesforceProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 /**
- * Service for managing Salesforce OAuth2 authentication.
- * Handles token acquisition and refresh.
+ * Service pour gérer l'authentification OAuth2 avec Salesforce.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class SalesforceAuthService {
 
-    private final SalesforceProperties salesforceProperties;
     private final RestTemplate restTemplate;
 
-    private volatile String cachedAccessToken;
-    private volatile long tokenExpiryTime;
+    @Value("${salesforce.client-id}")
+    private String clientId;
+
+    @Value("${salesforce.client-secret}")
+    private String clientSecret;
+
+    @Value("${salesforce.username}")
+    private String username;
+
+    @Value("${salesforce.password}")
+    private String password;
+
+    @Value("${salesforce.auth-url:https://login.salesforce.com/services/oauth2/token}")
+    private String authUrl;
+
+    private String cachedAccessToken;
+    private long tokenExpiryTime;
 
     /**
-     * Get a valid OAuth2 access token.
-     * Uses cached token if valid, otherwise requests a new one.
-     *
-     * @return Bearer access token
+     * Obtient un access token Salesforce (avec cache).
      */
     public String getAccessToken() {
-        // Check if cached token is still valid
-        if (isCachedTokenValid()) {
-            log.debug("Using cached Salesforce access token");
+        // Vérifier si le token en cache est encore valide
+        if (cachedAccessToken != null && System.currentTimeMillis() < tokenExpiryTime) {
             return cachedAccessToken;
         }
 
-        log.info("Requesting new Salesforce OAuth2 access token");
-        return requestNewToken();
+        // Sinon, obtenir un nouveau token
+        return refreshAccessToken();
     }
 
     /**
-     * Request a new OAuth2 access token from Salesforce.
-     * Uses password grant flow (username + password).
-     *
-     * @return New access token
+     * Rafraîchit le token d'accès via OAuth2 Password Flow.
      */
-    private String requestNewToken() {
+    private String refreshAccessToken() {
         try {
-            // Prepare OAuth2 request parameters
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("grant_type", "password");
-            body.add("client_id", salesforceProperties.getClientId());
-            body.add("client_secret", salesforceProperties.getClientSecret());
-            body.add("username", salesforceProperties.getUsername());
-            body.add("password", salesforceProperties.getPassword());
+            log.info("Requesting new Salesforce access token...");
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("grant_type", "password");
+            body.add("client_id", clientId);
+            body.add("client_secret", clientSecret);
+            body.add("username", username);
+            body.add("password", password);
+
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-            // Call Salesforce OAuth2 endpoint
-            SalesforceOAuth2Response response = restTemplate.postForObject(
-                    salesforceProperties.getTokenUrl(),
-                    request,
-                    SalesforceOAuth2Response.class
+            ResponseEntity<Map> response = restTemplate.exchange(
+                authUrl,
+                HttpMethod.POST,
+                request,
+                Map.class
             );
 
-            if (response == null || response.getAccessToken() == null) {
-                throw new RuntimeException("Failed to obtain Salesforce access token: invalid response");
-            }
+            Map<String, Object> responseBody = response.getBody();
+            cachedAccessToken = (String) responseBody.get("access_token");
 
-            // Cache the token (valid for ~2 hours, refresh after 1.5 hours)
-            cachedAccessToken = response.getAccessToken();
-            tokenExpiryTime = System.currentTimeMillis() + (90 * 60 * 1000); // 90 minutes
+            // Token expire généralement après 2 heures, on le cache pour 1h30
+            tokenExpiryTime = System.currentTimeMillis() + (90 * 60 * 1000);
 
-            log.info("Successfully obtained new Salesforce access token");
+            log.info("Salesforce access token obtained successfully");
             return cachedAccessToken;
 
+        } catch (HttpClientErrorException httpEx) {
+            String resp = httpEx.getResponseBodyAsString();
+            log.error("Salesforce HTTP error while obtaining access token: status={}, response={}", httpEx.getStatusCode(), resp);
+            // Try to extract helpful error fields if present
+            String message = "Failed to authenticate with Salesforce: " + resp;
+            throw new RuntimeException(message, httpEx);
         } catch (Exception e) {
-            log.error("Failed to obtain Salesforce access token", e);
-            throw new RuntimeException("OAuth2 authentication failed: " + e.getMessage(), e);
+            log.error("Error obtaining Salesforce access token", e);
+            throw new RuntimeException("Failed to authenticate with Salesforce", e);
         }
-    }
-
-    /**
-     * Check if the cached token is still valid.
-     *
-     * @return true if cached token exists and hasn't expired
-     */
-    private boolean isCachedTokenValid() {
-        return cachedAccessToken != null && 
-               System.currentTimeMillis() < tokenExpiryTime;
     }
 }

@@ -12,13 +12,14 @@
 	<description>Integration Salesforce Service</description>
 
 	<dependencies>
-		<!-- Events Common Module -->
+		<!-- Events Common (Module interne) -->
 		<dependency>
 			<groupId>com.medina</groupId>
 			<artifactId>events-common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
-		<!-- Spring Cloud Stream for RabbitMQ -->
+		<!-- Spring Cloud Stream + RabbitMQ Binder -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-stream</artifactId>

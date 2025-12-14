@@ -21,41 +21,41 @@ import java.util.UUID;
 @AllArgsConstructor
 public class IdMapping {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
-  /**
-   * Type d'entité locale: USER, BUILDING, IOT_ALERT, etc.
-   */
-  @Column(name = "local_entity_type", nullable = false, length = 50)
-  private String localEntityType;
+    /**
+     * Type d'entité locale: USER, BUILDING, IOT_ALERT, etc.
+     */
+    @Column(name = "local_entity_type", nullable = false, length = 50)
+    private String localEntityType;
 
-  /**
-   * L'ID de l'entité dans notre système (userId, buildingId, etc.)
-   */
-  @Column(name = "local_entity_id", nullable = false)
-  private UUID localEntityId;
+    /**
+     * L'ID de l'entité dans notre système (userId, buildingId, etc.)
+     */
+    @Column(name = "local_entity_id", nullable = false)
+    private UUID localEntityId;
 
-  /**
-   * L'ID Salesforce correspondant (ContactId, AssetId, CaseId, etc.)
-   */
-  @Column(name = "sf_entity_id", nullable = false, length = 18)
-  private String sfEntityId;
+    /**
+     * L'ID Salesforce correspondant (ContactId, AssetId, CaseId, etc.)
+     */
+    @Column(name = "sf_entity_id", nullable = false, length = 18)
+    private String sfEntityId;
 
-  @Column(name = "last_sync_at")
-  private OffsetDateTime lastSyncAt;
+    @Column(name = "last_sync_at")
+    private OffsetDateTime lastSyncAt;
 
-  @Column(name = "sync_status", length = 20)
-  private String syncStatus;
+    @Column(name = "sync_status", length = 20)
+    private String syncStatus;
 
-  @PrePersist
-  public void prePersist() {
-    if (lastSyncAt == null) {
-      lastSyncAt = OffsetDateTime.now();
+    @PrePersist
+    public void prePersist() {
+        if (lastSyncAt == null) {
+            lastSyncAt = OffsetDateTime.now();
+        }
+        if (syncStatus == null) {
+            syncStatus = "SYNCED";
+        }
     }
-    if (syncStatus == null) {
-      syncStatus = "SYNCED";
-    }
-  }
 }

@@ -11,12 +11,12 @@ import java.util.UUID;
  */
 public interface IdMappingRepository extends JpaRepository<IdMapping, UUID> {
 
-  /**
-   * Trouve le mapping Salesforce pour une entité locale donnée.
-   *
-   * @param entityType Type de l'entité (USER, BUILDING, etc.)
-   * @param entityId   ID local de l'entité
-   * @return Le mapping s'il existe
-   */
-  Optional<IdMapping> findByLocalEntityTypeAndLocalEntityId(String entityType, UUID entityId);
+    /**
+     * Trouve le mapping Salesforce pour une entité locale donnée.
+     *
+     * @param entityType Type de l'entité (USER, BUILDING, etc.)
+     * @param entityId   ID local de l'entité
+     * @return Le mapping s'il existe
+     */
+    Optional<IdMapping> findByLocalEntityTypeAndLocalEntityId(String entityType, UUID entityId);
 }

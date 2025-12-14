@@ -1,0 +1,11 @@
+{
+  "eventId": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2025-12-09T10:00:00Z",
+  "source": "external-alert-service",
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "qrCode": "BLDG-00123",
+  "imageUrl": "https://medina-heritage-media.s3.amazonaws.com/alerts/2025/12/photo-xyz.jpg",
+  "description": "Il y a une fissure inquiétante ici",
+  "longitude": -3.7037902,
+  "latitude": 40.4167754
+}

@@ -31,7 +31,7 @@ public class QrTag {
   @Column(name = "installed_at", updatable = false)
   private LocalDateTime installedAt;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "building_id", nullable = false)
   private Building building;
 }
