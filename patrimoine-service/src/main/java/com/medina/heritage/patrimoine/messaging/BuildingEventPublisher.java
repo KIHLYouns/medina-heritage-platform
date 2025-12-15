@@ -1,14 +1,12 @@
 package com.medina.heritage.patrimoine.messaging;
 
-// IMPORTANT : On importe maintenant les événements LOCAUX
-import com.medina.heritage.patrimoine.events.BuildingCreatedEvent;
-import com.medina.heritage.patrimoine.events.BuildingUpdatedEvent;
+import com.medina.heritage.events.building.BuildingCreatedEvent;
+import com.medina.heritage.events.building.BuildingUpdatedEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
-import org.springframework.messaging.support.MessageBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +25,6 @@ public class BuildingEventPublisher {
   public void publishBuildingCreated(BuildingCreatedEvent event) {
     log.info("Publication de l'événement CREATED pour le bâtiment : {}", event.getCode());
 
-    // On envoie le message. Note que nous n'appelons plus initializeDefaults()
-    // car nous n'héritons plus de BaseEvent.
     boolean sent = streamBridge.send(CREATED_BINDING, event);
 
     if (!sent) {

@@ -14,6 +14,8 @@ public class CreateBuildingRequestDTO {
 
   private String address;
 
+  private String description;
+
   @NotNull(message = "La latitude est requise")
   private Double latitude;
 

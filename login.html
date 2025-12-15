@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion - Smart City</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .login-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+    <script
+      async
+      crossorigin="anonymous"
+      data-clerk-publishable-key="pk_test_c3VtbWFyeS1zdGFyZmlzaC0yMi5jbGVyay5hY2NvdW50cy5kZXYk"
+      src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+      type="text/javascript"
+    ></script>
+  </head>
+  <body>
+    <div class="login-container">
+      <div id="clerk-sign-in"></div>
+    </div>
+
+    <script>
+      window.addEventListener("load", async function () {
+        await Clerk.load();
+
+        if (Clerk.user) {
+          // Si l'utilisateur est DÉJÀ connecté, on le renvoie direct vers le portail
+          window.location.href = "clerk.html";
+        } else {
+          // Sinon, on affiche le formulaire de connexion
+          const signInDiv = document.getElementById("clerk-sign-in");
+
+          Clerk.mountSignIn(signInDiv, {
+            // IMPORTANT : Où aller après une connexion réussie ?
+            // Ici, on redirige vers votre page "Portail Citoyen"
+            afterSignInUrl: "clerk.html",
+
+            // Options de style pour que ça ressemble à votre marque
+            appearance: {
+              variables: {
+                colorPrimary: "#0070d2",
+              },
+            },
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

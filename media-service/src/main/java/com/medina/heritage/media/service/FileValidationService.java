@@ -24,7 +24,7 @@ public class FileValidationService {
 
     // Types MIME autorisés
     private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
-            "image/jpeg", "image/png", "image/webp", "image/gif"
+            "image/jpeg","image/jpg", "image/png", "image/webp", "image/gif"
     );
 
     private static final Set<String> ALLOWED_VIDEO_TYPES = Set.of(

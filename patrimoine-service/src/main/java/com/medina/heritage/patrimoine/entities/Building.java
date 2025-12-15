@@ -31,6 +31,9 @@ public class Building {
   @Column(columnDefinition = "TEXT")
   private String address;
 
+  @Column(columnDefinition = "TEXT")
+  private String description;
+
   @Column(columnDefinition = "geometry(Point,4326)")
   private Point geom;
 
