@@ -12,6 +12,23 @@
 	<description>IoT Service</description>
 
 	<dependencies>
+		<!-- Events Common Module -->
+		<dependency>
+			<groupId>com.medina</groupId>
+			<artifactId>events-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<!-- Spring Cloud Stream with RabbitMQ -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-stream</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -29,6 +46,10 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 	</dependencies>
 </project>
