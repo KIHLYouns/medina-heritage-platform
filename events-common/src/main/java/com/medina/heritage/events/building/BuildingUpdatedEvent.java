@@ -7,18 +7,22 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Event emitted when a building is updated.
+ * Used for synchronizing building updates to external systems (e.g., Salesforce).
+ */
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class BuildingCreatedEvent extends BaseEvent {
+public class BuildingUpdatedEvent extends BaseEvent {
 
-    // Constantes utiles pour le routage RabbitMQ (optionnel mais propre)
-    public static final String EVENT_TYPE = "building.created";
+    // Constant for event routing
+    public static final String EVENT_TYPE = "building.updated";
 
-    // Données métier nécessaires pour Salesforce
-    private String buildingId; // UUID en String
+    // Business data for Salesforce sync
+    private String buildingId; // UUID as String
     private String code;
     private String name;
     private String address;
@@ -27,9 +31,11 @@ public class BuildingCreatedEvent extends BaseEvent {
     private Double longitude;
     private String imageUrl;
 
-    // Méthode utilitaire pour initialiser rapidement
-    public BuildingCreatedEvent initializeDefaults() {
-        this.initializeEvent("patrimoine-service"); // On définit la source ici
+    /**
+     * Utility method to initialize event defaults
+     */
+    public BuildingUpdatedEvent initializeDefaults() {
+        this.initializeEvent("patrimoine-service");
         return this;
     }
 }

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Submit Patrimoine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body class="bg-gray-100 min-h-screen py-10">
+    <div class="max-w-2xl mx-auto bg-white shadow-xl rounded-lg p-8">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <i class="fas fa-hammer text-indigo-600 mr-3"></i> Nouveau Bâtiment
+      </h1>
+
+      <form id="globalForm" onsubmit="handleSubmit(event)" class="space-y-4">
+        <input
+          type="hidden"
+          id="userId"
+          value="550e8400-e29b-41d4-a716-446655440000"
+        />
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold text-gray-700">Code</label>
+            <input
+              type="text"
+              id="code"
+              value="BAT-002"
+              class="w-full border rounded p-2"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700">Nom</label>
+            <input
+              type="text"
+              id="name"
+              value="Tour Mohammed VI"
+              class="w-full border rounded p-2"
+              required
+            />
+          </div>
+          <div class="col-span-2">
+            <label class="block text-sm font-bold text-gray-700">Adresse</label>
+            <input
+              type="text"
+              id="address"
+              value="Rabat, Maroc"
+              class="w-full border rounded p-2"
+              required
+            />
+          </div>
+        </div>
+
+        <div
+          class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition"
+        >
+          <i class="fas fa-image text-3xl text-gray-400 mb-2"></i>
+          <label class="block cursor-pointer">
+            <span class="text-indigo-600 font-semibold"
+              >Cliquez pour choisir une image</span
+            >
+            <input type="file" id="fileInput" class="hidden" required />
+          </label>
+          <p id="fileName" class="text-sm text-gray-500 mt-2">
+            Aucun fichier choisi
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          id="submitBtn"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded transition flex justify-center items-center"
+        >
+          <span>Enregistrer le Patrimoine</span>
+        </button>
+
+        <div
+          id="statusLog"
+          class="mt-4 text-sm font-mono hidden p-3 rounded"
+        ></div>
+      </form>
+    </div>
+
+    <script>
+      // --- CONFIGURATION ---
+      // --- CONFIGURATION CORRIGÉE ---
+      // On remplace 'localhost' par '127.0.0.1' pour éviter les conflits IPv4/IPv6
+      const API_MEDIA = "http://127.0.0.1:8088/api/media";
+      const API_BUILDING = "http://127.0.0.1:8081/api/buildings";
+      // Affichage du nom du fichier
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function (e) {
+          const fileName = e.target.files[0]
+            ? e.target.files[0].name
+            : "Aucun fichier choisi";
+          document.getElementById("fileName").textContent = fileName;
+        });
+
+      // Fonction utilitaire pour les logs
+      function setStatus(msg, type = "info") {
+        const el = document.getElementById("statusLog");
+        el.classList.remove(
+          "hidden",
+          "bg-red-100",
+          "text-red-700",
+          "bg-green-100",
+          "text-green-700",
+          "bg-blue-100",
+          "text-blue-700"
+        );
+
+        if (type === "error") el.classList.add("bg-red-100", "text-red-700");
+        else if (type === "success")
+          el.classList.add("bg-green-100", "text-green-700");
+        else el.classList.add("bg-blue-100", "text-blue-700");
+
+        el.innerHTML = msg;
+        el.classList.remove("hidden");
+      }
+
+      // --- CŒUR DE LA LOGIQUE ---
+      async function handleSubmit(event) {
+        event.preventDefault();
+        const btn = document.getElementById("submitBtn");
+        const originalBtnText = btn.innerHTML;
+
+        // 1. Préparation
+        const file = document.getElementById("fileInput").files[0];
+        const userId = document.getElementById("userId").value;
+
+        if (!file) {
+          setStatus("Veuillez choisir une image", "error");
+          return;
+        }
+
+        btn.disabled = true;
+        let uploadedMediaId = null; // Pour garder une trace si on doit annuler
+
+        try {
+          // ---------------------------------------------------------
+          // ÉTAPE A : UPLOAD DE L'IMAGE
+          // ---------------------------------------------------------
+          btn.innerHTML =
+            '<i class="fas fa-spinner fa-spin mr-2"></i> Upload en cours...';
+          setStatus("Upload de l'image vers S3...");
+
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("userId", userId);
+          formData.append("entityType", "BUILDING");
+
+          const uploadRes = await fetch(`${API_MEDIA}/upload`, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!uploadRes.ok) throw new Error("Échec de l'upload image");
+
+          const uploadData = await uploadRes.json();
+
+          // IMPORTANT : On récupère l'ID et l'URL
+          // Adapte selon ton ApiResponse : uploadData.data.id / uploadData.data.url
+          uploadedMediaId = uploadData.data.id;
+          const imageUrl = uploadData.data.url;
+
+          console.log("Image uploadée, ID:", uploadedMediaId);
+
+          // ---------------------------------------------------------
+          // ÉTAPE B : CRÉATION DU BÂTIMENT
+          // ---------------------------------------------------------
+          btn.innerHTML =
+            '<i class="fas fa-cog fa-spin mr-2"></i> Création du bâtiment...';
+          setStatus("Image OK. Enregistrement du bâtiment...");
+
+          const buildingData = {
+            code: document.getElementById("code").value,
+            name: document.getElementById("name").value,
+            address: document.getElementById("address").value,
+            latitude: 33.5, // Valeurs hardcodées pour l'exemple
+            longitude: -7.5,
+            imageUrl: imageUrl, // On passe l'URL reçue
+            mediaId: uploadedMediaId, // Optionnel, si tu veux le lier via event
+          };
+
+          const buildRes = await fetch(API_BUILDING, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(buildingData),
+          });
+
+          if (!buildRes.ok) {
+            // Si le bâtiment échoue, on lance une erreur manuelle
+            // pour tomber dans le bloc catch()
+            throw new Error("Erreur validation Bâtiment (Code déjà pris ?)");
+          }
+
+          const buildData = await buildRes.json();
+
+          // ---------------------------------------------------------
+          // SUCCÈS TOTAL
+          // ---------------------------------------------------------
+          setStatus(
+            `<b>Succès !</b> Bâtiment créé (ID: ${buildData.id}) avec l'image.`,
+            "success"
+          );
+          btn.innerHTML = '<i class="fas fa-check mr-2"></i> Enregistré !';
+          document.getElementById("globalForm").reset();
+          document.getElementById("fileName").textContent =
+            "Aucun fichier choisi";
+        } catch (error) {
+          // ---------------------------------------------------------
+          // GESTION D'ERREUR ET ROLLBACK (NETTOYAGE)
+          // ---------------------------------------------------------
+          console.error(error);
+
+          let errorMsg = `Erreur : ${error.message}`;
+
+          // Si on a un ID média mais que ça a planté après, on supprime l'image
+          if (uploadedMediaId) {
+            setStatus(
+              "Erreur lors de la création du bâtiment. Suppression de l'image inutile...",
+              "error"
+            );
+            btn.innerHTML = '<i class="fas fa-trash mr-2"></i> Nettoyage...';
+
+            try {
+              // APPEL DE L'API DELETE MEDIA
+              await fetch(`${API_MEDIA}/${uploadedMediaId}?userId=${userId}`, {
+                method: "DELETE",
+              });
+              errorMsg +=
+                "<br><br><em>(L'image uploadée a été nettoyée automatiquement)</em>";
+            } catch (deleteError) {
+              console.error("Échec du rollback", deleteError);
+              errorMsg +=
+                "<br><em>(Attention: L'image n'a pas pu être supprimée)</em>";
+            }
+          }
+
+          setStatus(errorMsg, "error");
+          btn.innerHTML = originalBtnText;
+        } finally {
+          btn.disabled = false;
+          if (btn.innerHTML.includes("spin")) btn.innerHTML = originalBtnText;
+        }
+      }
+    </script>
+  </body>
+</html>

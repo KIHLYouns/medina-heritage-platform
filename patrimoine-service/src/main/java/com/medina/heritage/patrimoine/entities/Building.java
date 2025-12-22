@@ -31,11 +31,17 @@ public class Building {
   @Column(columnDefinition = "TEXT")
   private String address;
 
+  @Column(columnDefinition = "TEXT")
+  private String description;
+
   @Column(columnDefinition = "geometry(Point,4326)")
   private Point geom;
 
   @Column(name = "sf_asset_id")
   private String sfAssetId;
+
+  @Column(name = "image_url", columnDefinition = "TEXT")
+  private String imageUrl;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)
@@ -44,4 +50,6 @@ public class Building {
   @UpdateTimestamp
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+
 }

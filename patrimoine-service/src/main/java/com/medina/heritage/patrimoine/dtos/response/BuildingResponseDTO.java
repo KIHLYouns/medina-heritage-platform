@@ -9,6 +9,8 @@ public class BuildingResponseDTO {
   private String code;
   private String name;
   private String address;
+  private String description;
   private String sfAssetId;
   private LocationDTO location; 
+  private String imageUrl;
 }

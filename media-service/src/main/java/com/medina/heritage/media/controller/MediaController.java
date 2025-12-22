@@ -23,6 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/media")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class MediaController {
 
     private final MediaService mediaService;
@@ -44,9 +45,9 @@ public class MediaController {
         request.setEntityId(entityId);
 
         MediaResponse response = mediaService.uploadFile(file, request);
-        
+
         log.info("File uploaded: id={}, filename={}", response.getId(), response.getOriginalFilename());
-        
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Media uploaded successfully", response));

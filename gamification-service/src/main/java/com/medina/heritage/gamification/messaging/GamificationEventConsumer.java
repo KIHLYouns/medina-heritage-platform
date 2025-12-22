@@ -44,8 +44,8 @@ public class GamificationEventConsumer {
         return event -> {
             log.info("Received UserCreatedEvent for user: {} ({})", event.getUserId(), event.getEmail());
             try {
-                // Convert Long userId to UUID (temporary workaround)
-                UUID userId = new UUID(event.getUserId(), 0L);
+                // Convert userId string from event (UUID string) to UUID
+                UUID userId = UUID.fromString(event.getUserId());
                 
                 // Create wallet for the new user
                 WalletResponse wallet = walletService.getOrCreateWallet(userId);
@@ -60,9 +60,9 @@ public class GamificationEventConsumer {
                 var transaction = walletService.addPoints(welcomePoints);
                 log.info("Welcome points awarded: {} points to user {}", WELCOME_POINTS, userId);
                 
-                // Publish PointsEarnedEvent
+                // Publish PointsEarnedEvent (no numeric referenceId available for user registration)
                 publishPointsEarned(userId, WELCOME_POINTS, transaction.getBalanceAfter(), 
-                        "USER_REGISTRATION", event.getUserId(), "Points de bienvenue");
+                    "USER_REGISTRATION", null, "Points de bienvenue");
                 
             } catch (Exception e) {
                 log.error("Error processing UserCreatedEvent for user: {}. Error: {}", 

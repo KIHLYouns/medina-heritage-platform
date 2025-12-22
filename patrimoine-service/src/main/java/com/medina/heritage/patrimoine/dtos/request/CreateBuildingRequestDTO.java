@@ -14,9 +14,13 @@ public class CreateBuildingRequestDTO {
 
   private String address;
 
+  private String description;
+
   @NotNull(message = "La latitude est requise")
   private Double latitude;
 
   @NotNull(message = "La longitude est requise")
   private Double longitude;
+
+  private String imageUrl;
 }

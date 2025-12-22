@@ -14,6 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/buildings")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class BuildingController {
 
   private final BuildingService service;

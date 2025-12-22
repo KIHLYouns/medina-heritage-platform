@@ -72,5 +72,16 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
+		<!-- Svix for Clerk Webhook verification -->
+		<dependency>
+			<groupId>com.svix</groupId>
+			<artifactId>svix</artifactId>
+			<version>1.10.0</version>
+		</dependency>
+		<!-- Jakarta Servlet API -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+		</dependency>
 	</dependencies>
 </project>

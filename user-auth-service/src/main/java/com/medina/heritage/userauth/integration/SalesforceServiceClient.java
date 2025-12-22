@@ -1,6 +1,6 @@
 package com.medina.heritage.userauth.integration;
 
-import com.medina.heritage.userauth.event.UserCreatedEvent;
+import com.medina.heritage.events.user.UserCreatedEvent;
 import com.medina.heritage.userauth.event.UserUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,17 +34,18 @@ public class SalesforceServiceClient {
     public void notifyUserCreated(UserCreatedEvent event) {
         try {
             String url = salesforceServiceUrl + "/api/salesforce/contacts";
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            
+
             HttpEntity<UserCreatedEvent> request = new HttpEntity<>(event, headers);
-            
+
             restTemplate.postForEntity(url, request, Void.class);
             log.info("Successfully notified Salesforce of user creation: {}", event.getEmail());
         } catch (Exception e) {
             log.error("Failed to notify Salesforce of user creation: {}", event.getEmail(), e);
-            // Ne pas propager l'exception - la création utilisateur doit réussir même si SF échoue
+            // Ne pas propager l'exception - la création utilisateur doit réussir même si SF
+            // échoue
         }
     }
 
@@ -55,12 +56,12 @@ public class SalesforceServiceClient {
     public void notifyUserUpdated(UserUpdatedEvent event) {
         try {
             String url = salesforceServiceUrl + "/api/salesforce/contacts/" + event.getUserId();
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            
+
             HttpEntity<UserUpdatedEvent> request = new HttpEntity<>(event, headers);
-            
+
             restTemplate.put(url, request);
             log.info("Successfully notified Salesforce of user update: {}", event.getEmail());
         } catch (Exception e) {
