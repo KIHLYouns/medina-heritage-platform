@@ -28,11 +28,13 @@ public class CitizenAlertEventConsumer {
     /**
      * Consumer pour CitizenAlertCreatedEvent.
      * Identifie le bâtiment patrimonial via le QR code et publie un événement enrichi.
+     * Extrait uniquement les champs nécessaires pour la création du Case.
      */
     @Bean
     public Consumer<CitizenAlertCreatedEvent> citizenAlertCreatedConsumer() {
         return event -> {
-            log.info("Received CitizenAlertCreatedEvent for QR code: {}", event.getQrCode());
+            log.info("Received CitizenAlertCreatedEvent for QR code: {} from user: {}", 
+                    event.getQrCode(), event.getUserId());
             
             try {
                 // 1. Trouver le QR tag par son contenu (qrCode)
@@ -45,22 +47,25 @@ public class CitizenAlertEventConsumer {
                 
                 log.info("Building identified: {} (ID: {})", building.getName(), building.getId());
                 
-                // 2. Créer un événement enrichi avec les infos du bâtiment
+                
+                // 3. Créer un événement enrichi avec UNIQUEMENT les infos nécessaires
                 CitizenAlertIdentifiedEvent identifiedEvent = CitizenAlertIdentifiedEvent.builder()
-                    .userId(event.getUserId())
-                    .buildingId(building.getId())
-                    .buildingCode(building.getCode())
-                    .buildingName(building.getName())
-                    .imageUrl(event.getImageUrl())
-                    .description(event.getDescription())
-                    .longitude(event.getLongitude())
-                    .latitude(event.getLatitude())
+                    .claimId(event.getClaimId())         // ID externe pour mapping Case Salesforce
+                    .userId(event.getUserId())           // UUID interne de l'utilisateur
+                    .buildingId(building.getId())        // UUID du building
+                    .buildingCode(building.getCode())    // Code du building
+                    .buildingName(building.getName())    // Nom du building
+                    .imageUrl(event.getImageUrl())                  // URL de la première image
+                    .description(event.getDescription()) // Description de la réclamation
+                    .longitude(event.getLongitude())     // Longitude
+                    .latitude(event.getLatitude())       // Latitude
                     .build();
                 
-                // 3. Publier l'événement pour que integration-service le traite
+                // 4. Publier l'événement pour que integration-service le traite
                 citizenAlertEventPublisher.publishCitizenAlertIdentified(identifiedEvent);
                 
-                log.info("Published CitizenAlertIdentifiedEvent for building: {}", building.getCode());
+                log.info("Published CitizenAlertIdentifiedEvent for building: {} with image: {}", 
+                        building.getCode(), event.getImageUrl() != null ? "Yes" : "No");
                 
             } catch (ResourceNotFoundException e) {
                 log.error("QR Code not found: {}", e.getMessage());

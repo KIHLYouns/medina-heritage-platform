@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -23,6 +24,9 @@ public class CitizenAlertEventConsumer {
 
     private final IdMappingRepository idMappingRepository;
     private final SalesforceCaseService salesforceCaseService;
+    
+    // UUID namespace pour générer des UUIDs déterministes à partir de String claimIds
+    private static final UUID CLAIM_NAMESPACE = UUID.fromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
 
     /**
      * Consumer pour CitizenAlertIdentifiedEvent.
@@ -31,11 +35,11 @@ public class CitizenAlertEventConsumer {
     @Bean
     public Consumer<CitizenAlertIdentifiedEvent> citizenAlertIdentifiedConsumer() {
         return event -> {
-            log.info("Received CitizenAlertIdentifiedEvent for building: {} ({})", 
-                    event.getBuildingId(), event.getBuildingCode());
+            log.info("Received CitizenAlertIdentifiedEvent for building: {} ({}) from user UUID: {}", 
+                    event.getBuildingId(), event.getBuildingCode(), event.getUserId());
 
             try {
-                // 1. Récupérer le Contact ID (User -> Contact)
+                // 1. Récupérer le Contact ID (User UUID -> Contact)
                 String contactId = getSalesforceId("USER", event.getUserId());
                 if (contactId == null) {
                     log.warn("No Salesforce Contact found for userId: {}", event.getUserId());
@@ -62,6 +66,28 @@ public class CitizenAlertEventConsumer {
                 );
 
                 log.info("Case created in Salesforce: {}", caseId);
+                
+                // 4. Mapper le claimId avec le caseId pour suivi
+                if (event.getClaimId() != null && !event.getClaimId().trim().isEmpty()) {
+                    try {
+                        // Créer un UUID déterministe à partir du String claimId
+                        UUID claimUUID = generateDeterministicUUID(event.getClaimId());
+                        
+                        IdMapping claimMapping = IdMapping.builder()
+                            .localEntityType("CLAIM")
+                            .localEntityId(claimUUID)
+                            .sfEntityId(caseId)
+                            .syncStatus("SYNCED")
+                            .build();
+                        idMappingRepository.save(claimMapping);
+                        
+                        log.info("Mapped claimId {} (UUID: {}) to Salesforce caseId {}", 
+                                event.getClaimId(), claimUUID, caseId);
+                    } catch (Exception e) {
+                        log.warn("Failed to save claimId mapping: {} - continuing anyway", 
+                                event.getClaimId(), e);
+                    }
+                }
 
             } catch (Exception e) {
                 log.error("Error processing CitizenAlertIdentifiedEvent: {}", e.getMessage(), e);
@@ -72,7 +98,7 @@ public class CitizenAlertEventConsumer {
     }
 
     /**
-     * Récupère l'ID Salesforce correspondant à une entité locale.
+     * Récupère l'ID Salesforce correspondant à une entité locale via UUID.
      */
     private String getSalesforceId(String entityType, java.util.UUID entityId) {
         Optional<IdMapping> mapping = idMappingRepository
@@ -80,4 +106,13 @@ public class CitizenAlertEventConsumer {
 
         return mapping.map(IdMapping::getSfEntityId).orElse(null);
     }
+    
+    /**
+     * Génère un UUID v5 déterministe basé sur un String claimId.
+     * Cela garantit que le même claimId génère toujours le même UUID.
+     */
+    private UUID generateDeterministicUUID(String claimId) {
+        return UUID.nameUUIDFromBytes((CLAIM_NAMESPACE.toString() + ":" + claimId).getBytes());
+    }
 }
+

@@ -38,6 +38,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("User retrieved successfully", user));
     }
 
+    @GetMapping("/by-clerk-id/{clerkId}")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserByClerkId(@PathVariable String clerkId) {
+        UserResponse user = userService.getUserByClerkId(clerkId);
+        return ResponseEntity.ok(ApiResponse.success("User retrieved successfully", user));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> updateProfile(
             @PathVariable UUID id,

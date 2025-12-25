@@ -19,4 +19,13 @@ public interface IdMappingRepository extends JpaRepository<IdMapping, UUID> {
      * @return Le mapping s'il existe
      */
     Optional<IdMapping> findByLocalEntityTypeAndLocalEntityId(String entityType, UUID entityId);
+    
+    /**
+     * Trouve le mapping par l'ID Salesforce (reverse lookup).
+     * Utile pour retrouver le claimId depuis un caseId Salesforce.
+     *
+     * @param sfEntityId L'ID Salesforce (ex: Case ID)
+     * @return Le mapping s'il existe
+     */
+    Optional<IdMapping> findBySfEntityId(String sfEntityId);
 }

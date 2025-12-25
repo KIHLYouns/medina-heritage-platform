@@ -43,6 +43,12 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
+    public UserResponse getUserByClerkId(String clerkId) {
+        User user = userRepository.findByClerkId(clerkId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "clerkId", clerkId));
+        return userMapper.toUserResponse(user);
+    }
+
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(userMapper::toUserResponse)

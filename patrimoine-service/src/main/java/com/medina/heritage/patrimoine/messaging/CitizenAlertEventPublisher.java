@@ -1,5 +1,6 @@
 package com.medina.heritage.patrimoine.messaging;
 
+import com.medina.heritage.events.alert.CitizenAlertCreatedEvent;
 import com.medina.heritage.events.alert.CitizenAlertIdentifiedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,28 @@ public class CitizenAlertEventPublisher {
 
     private final StreamBridge streamBridge;
     
+    private static final String CITIZEN_ALERT_CREATED_BINDING = "citizenAlertCreated-out-0";
     private static final String CITIZEN_ALERT_IDENTIFIED_BINDING = "citizenAlertIdentifiedSupplier-out-0";
+
+    /**
+     * Publie un événement CitizenAlertCreatedEvent reçu depuis Kafka
+     * vers RabbitMQ pour traitement interne.
+     * 
+     * @param event L'événement créé à partir des données Kafka
+     */
+    public void publishCitizenAlertCreated(CitizenAlertCreatedEvent event) {
+        event.initializeDefaults();
+        log.info("Publishing CitizenAlertCreatedEvent for QR code: {}, user: {}", 
+                event.getQrCode(), event.getUserId());
+        
+        boolean sent = streamBridge.send(CITIZEN_ALERT_CREATED_BINDING, event);
+        
+        if (sent) {
+            log.debug("CitizenAlertCreatedEvent sent successfully");
+        } else {
+            log.error("Failed to send CitizenAlertCreatedEvent");
+        }
+    }
 
     /**
      * Publie un événement quand un bâtiment patrimonial est identifié via QR code
