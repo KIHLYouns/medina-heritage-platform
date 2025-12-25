@@ -29,6 +29,12 @@
         <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
     </dependency>
 
+    <!-- Spring Kafka -->
+    <dependency>
+        <groupId>org.springframework.kafka</groupId>
+        <artifactId>spring-kafka</artifactId>
+    </dependency>
+
     <!-- Web REST -->
     <dependency>
         <groupId>org.springframework.boot</groupId>

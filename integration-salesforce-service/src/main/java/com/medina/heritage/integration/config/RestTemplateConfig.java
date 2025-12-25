@@ -24,9 +24,4 @@ public class RestTemplateConfig {
 
         return new RestTemplate(factory);
     }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
 }

@@ -20,7 +20,8 @@ public class CitizenAlertIdentifiedEvent extends BaseEvent {
     
     public static final String EVENT_TYPE = "building.citizen.alert.identified";
 
-    private UUID userId;
+    private String claimId;          // ID unique depuis le système externe (pour mapping Case)
+    private UUID userId;             // UUID interne de l'utilisateur
     private UUID buildingId;
     private String buildingCode;
     private String buildingName;
