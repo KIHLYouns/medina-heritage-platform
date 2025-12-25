@@ -163,10 +163,10 @@ public class SalesforceCaseService {
         // Note: Ces champs doivent exister dans votre org Salesforce
         
         if (imageUrl != null) {
-            payload.put("Image_Url__c", imageUrl);
+            payload.put("Images__c", imageUrl);
         }
 
-        log.debug("Case payload: {}", payload);
+        log.info("Case payload: {}", payload);
         return payload;
     }
 }
