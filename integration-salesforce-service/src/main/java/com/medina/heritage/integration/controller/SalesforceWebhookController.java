@@ -1,7 +1,9 @@
 package com.medina.heritage.integration.controller;
 
 import com.medina.heritage.events.alert.CaseStatusUpdateEvent;
+import com.medina.heritage.events.alert.ServiceResponseEvent;
 import com.medina.heritage.integration.dtos.request.SalesforceCaseStatusUpdateRequest;
+import com.medina.heritage.integration.dtos.request.SalesforceServiceResponseRequest;
 import com.medina.heritage.integration.messaging.EventPublisherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -111,6 +113,102 @@ public class SalesforceWebhookController {
             .caseId(request.getCaseId())
             .status(statusInfo)
             .resolution(resolutionInfo)
+            .build();
+        
+        // Initialiser les valeurs par défaut (serviceName, etc.)
+        event.initializeDefaults();
+        
+        return event;
+    }
+
+    /**
+     * Endpoint pour recevoir les réponses de service depuis Salesforce.
+     * POST /api/salesforce/webhook/service-response
+     * 
+     * @param request Le payload JSON envoyé par Salesforce
+     * @return ResponseEntity avec statut 200 si succès, 500 si erreur
+     */
+    @PostMapping("/service-response")
+    public ResponseEntity<WebhookResponse> handleServiceResponse(
+            @RequestBody SalesforceServiceResponseRequest request) {
+        
+        log.info("Received Service Response webhook from Salesforce - CaseId: {}, ServiceType: {}, Operator: {}", 
+                request.getCaseId(), 
+                request.getResponse() != null && request.getResponse().getFrom() != null 
+                    ? request.getResponse().getFrom().getServiceType() : "N/A",
+                request.getResponse() != null && request.getResponse().getFrom() != null 
+                    ? request.getResponse().getFrom().getOperatorName() : "N/A");
+        
+        try {
+            // Convertir le DTO de la requête en événement du domain
+            ServiceResponseEvent event = convertToServiceResponseEvent(request);
+            
+            // Publier l'événement sur le bus de messages
+            eventPublisherService.publishServiceResponse(event);
+            
+            log.info("Successfully processed Service Response for CaseId: {}", request.getCaseId());
+            
+            return ResponseEntity.ok(
+                WebhookResponse.builder()
+                    .success(true)
+                    .message("Service response received and published successfully")
+                    .eventId(event.getEventId().toString())
+                    .build()
+            );
+            
+        } catch (Exception e) {
+            log.error("Error processing Service Response webhook for CaseId: {}", 
+                    request.getCaseId(), e);
+            
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(WebhookResponse.builder()
+                    .success(false)
+                    .message("Failed to process webhook: " + e.getMessage())
+                    .build()
+                );
+        }
+    }
+
+    /**
+     * Convertit le DTO de requête Salesforce en événement ServiceResponse.
+     */
+    private ServiceResponseEvent convertToServiceResponseEvent(SalesforceServiceResponseRequest request) {
+        
+        // Convertir les informations de l'opérateur
+        ServiceResponseEvent.ServiceOperator operator = null;
+        if (request.getResponse() != null && request.getResponse().getFrom() != null) {
+            operator = ServiceResponseEvent.ServiceOperator.builder()
+                .serviceType(request.getResponse().getFrom().getServiceType())
+                .operatorId(request.getResponse().getFrom().getOperatorId())
+                .operatorName(request.getResponse().getFrom().getOperatorName())
+                .build();
+        }
+        
+        // Convertir les pièces jointes
+        java.util.List<ServiceResponseEvent.ResponseAttachment> attachments = null;
+        if (request.getResponse() != null && request.getResponse().getAttachments() != null) {
+            attachments = request.getResponse().getAttachments().stream()
+                .map(att -> ServiceResponseEvent.ResponseAttachment.builder()
+                    .url(att.getUrl())
+                    .fileName(att.getFileName())
+                    .fileType(att.getFileType())
+                    .build())
+                .collect(java.util.stream.Collectors.toList());
+        }
+        
+        // Extraire le message
+        String message = request.getResponse() != null ? request.getResponse().getMessage() : null;
+        
+        // Créer l'événement
+        ServiceResponseEvent event = ServiceResponseEvent.builder()
+            .eventId(UUID.randomUUID().toString())
+            .timestamp(Instant.now())
+            .caseId(request.getCaseId())
+            .from(operator)
+            .message(message)
+            .attachments(attachments)
+            .serviceReference(request.getServiceReference())
             .build();
         
         // Initialiser les valeurs par défaut (serviceName, etc.)
