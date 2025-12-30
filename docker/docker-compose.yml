@@ -1,0 +1,126 @@
+version: '3.8'
+
+networks:
+  medina-net:
+    driver: bridge
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: heritage-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file: .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - medina-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  heritage-db:
+    image: kihlyouns/heritage-db:latest
+    container_name: heritage-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - medina-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MICROSERVICES
+
+  auth-user:
+    image: kihlyouns/auth-user:latest
+    container_name: auth-user
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    env_file: .env
+    environment:
+      - USER_AUTH_DATABASE_URL=jdbc:postgresql://heritage-db:5432/user_db
+      - RABBITMQ_HOST=heritage-rabbitmq
+    depends_on:
+      heritage-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - medina-net
+
+  patrimoine:
+    image: kihlyouns/patrimoine:latest
+    container_name: patrimoine
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    env_file: .env
+    environment:
+      - PATRIMOINE_DATABASE_URL=jdbc:postgresql://heritage-db:5432/patrimoine_db
+      - RABBITMQ_HOST=heritage-rabbitmq
+      - APPLICATION_USER_SERVICE_URL=http://auth-user:8081
+    depends_on:
+      heritage-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - medina-net
+
+  media:
+    image: kihlyouns/media:latest
+    container_name: media
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    env_file: .env
+    environment:
+      - MEDIA_DATABASE_URL=jdbc:postgresql://heritage-db:5432/media_db
+      - RABBITMQ_HOST=heritage-rabbitmq
+    depends_on:
+      heritage-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - medina-net
+
+  integration-salesforce:
+    image: kihlyouns/integration-salesforce:latest
+    container_name: integration-salesforce
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    env_file: .env
+    environment:
+      - INTEGRATION_SALESFORCE_DATABASE_URL=jdbc:postgresql://heritage-db:5432/integration_salesforce_db
+      - RABBITMQ_HOST=heritage-rabbitmq
+    depends_on:
+      heritage-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - medina-net
+
+volumes:
+  rabbitmq_data:
+  db_data:
